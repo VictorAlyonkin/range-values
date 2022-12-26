@@ -1,18 +1,22 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.*;
 
 public class Main {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
+        int maxValue = 0;
         String[] texts = new String[25];
-        List<Thread> threads = new ArrayList<>();
+        List<Future> futures = new ArrayList<>();
+        ExecutorService threadPool = Executors.newFixedThreadPool(6);
+
         for (int i = 0; i < texts.length; i++) {
             texts[i] = generateText("aab", 30_000);
         }
 
         for (String text : texts) {
-            threads.add(new Thread(() -> {
+            Callable<Integer> callable = () -> {
                 int maxSize = 0;
                 for (int i = 0; i < text.length(); i++) {
                     for (int j = 0; j < text.length(); j++) {
@@ -32,16 +36,22 @@ public class Main {
                     }
                 }
                 System.out.println(text.substring(0, 100) + " -> " + maxSize);
-            }));
+                return maxSize;
+            };
+            Future<Integer> future = threadPool.submit(callable);
+            futures.add(future);
         }
 
         long startTs = System.currentTimeMillis(); // start time
-        for (Thread thread : threads) {
-            thread.start();
+        for (Future future : futures) {
+            int futureValue = Integer.parseInt(future.get().toString());
+            maxValue = Integer.max(maxValue, futureValue);
         }
-        for (Thread thread : threads) {
-            thread.join(); // зависаем, ждём когда поток, объект которого лежит в thread, завершится
-        }
+
+        System.out.println("Максимальный интервал значений среди всех строк = " + maxValue + ".");
+
+        threadPool.shutdown();
+
         long endTs = System.currentTimeMillis(); // end time
 
         System.out.println("Time: " + (endTs - startTs) + "ms");
