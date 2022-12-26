@@ -11,8 +11,6 @@ public class Main {
             texts[i] = generateText("aab", 30_000);
         }
 
-        long startTs = System.currentTimeMillis(); // start time
-
         for (String text : texts) {
             threads.add(new Thread(() -> {
                 int maxSize = 0;
@@ -37,14 +35,13 @@ public class Main {
             }));
         }
 
-        for (Thread thread: threads) {
+        long startTs = System.currentTimeMillis(); // start time
+        for (Thread thread : threads) {
             thread.start();
         }
-
         for (Thread thread : threads) {
             thread.join(); // зависаем, ждём когда поток, объект которого лежит в thread, завершится
         }
-
         long endTs = System.currentTimeMillis(); // end time
 
         System.out.println("Time: " + (endTs - startTs) + "ms");
