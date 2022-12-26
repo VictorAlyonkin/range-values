@@ -9,7 +9,7 @@ public class Main {
         int maxValue = 0;
         String[] texts = new String[25];
         List<Future> futures = new ArrayList<>();
-        ExecutorService threadPool = Executors.newFixedThreadPool(6);
+        ExecutorService threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         for (int i = 0; i < texts.length; i++) {
             texts[i] = generateText("aab", 30_000);
